@@ -83,21 +83,6 @@ def run_experiment(param_name, param_values, fixed_params, X_tr, y_tr, X_val, y_
         results.append({param_name: val, 'Accuracy': acc, 'Final Loss': p.val_loss_history[-1]})
     return pd.DataFrame(results)
 
-print("\n" + "="*50)
-print("ЭКСПЕРИМЕНТ 1: Влияние скорости обучения (η)")
-print("="*50)
-lr_values = [0.001, 0.01, 0.5, 1.0]
-plt.figure(figsize=(8, 5))
-for lr in lr_values:
-    model = Perceptron(input_dim=2)
-    model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=lr, batch_size=32)
-    test_acc = np.mean(model.predict(X_test) == y_test)
-    plt.plot(model.val_loss_history, label=f"η = {lr} (Acc: {test_acc:.2%})")
-    print(f"η = {lr:<5} | Точность: {test_acc:.2%}")
-plt.xlabel("Эпоха"); plt.ylabel("Validation Loss")
-plt.legend(); plt.grid(True); plt.title("Влияние скорости обучения")
-plt.show()
-
 from sklearn.model_selection import KFold
 
 lr_grid = [0.005, 0.01, 0.05, 0.1]

@@ -83,66 +83,6 @@ def run_experiment(param_name, param_values, fixed_params, X_tr, y_tr, X_val, y_
         results.append({param_name: val, 'Accuracy': acc, 'Final Loss': p.val_loss_history[-1]})
     return pd.DataFrame(results)
 
-print("\n" + "="*50)
-print("ЭКСПЕРИМЕНТ 1: Влияние скорости обучения (η)")
-print("="*50)
-lr_values = [0.001, 0.01, 0.5, 1.0]
-plt.figure(figsize=(8, 5))
-for lr in lr_values:
-    model = Perceptron(input_dim=2)
-    model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=lr, batch_size=32)
-    test_acc = np.mean(model.predict(X_test) == y_test)
-    plt.plot(model.val_loss_history, label=f"η = {lr} (Acc: {test_acc:.2%})")
-    print(f"η = {lr:<5} | Точность: {test_acc:.2%}")
-plt.xlabel("Эпоха"); plt.ylabel("Validation Loss")
-plt.legend(); plt.grid(True); plt.title("Влияние скорости обучения")
-plt.show()
-
-print("\n" + "="*50)
-print("ЭКСПЕРИМЕНТ 2: Влияние размера батча")
-print("="*50)
-batch_values = [1, 16, 64, 256]
-plt.figure(figsize=(8, 5))
-for bs in batch_values:
-    model = Perceptron(input_dim=2)
-    model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=0.1, batch_size=bs)
-    test_acc = np.mean(model.predict(X_test) == y_test)
-    plt.plot(model.val_loss_history, label=f"batch = {bs} (Acc: {test_acc:.2%})")
-    print(f"batch = {bs:<4} | Точность: {test_acc:.2%}")
-plt.xlabel("Эпоха"); plt.ylabel("Validation Loss")
-plt.legend(); plt.grid(True); plt.title("Влияние размера батча")
-plt.show()
-
-print("\n" + "="*50)
-print("ЭКСПЕРИМЕНТ 3: Влияние инициализации весов")
-print("="*50)
-plt.figure(figsize=(8, 5))
-
-model = Perceptron(input_dim=2)
-model.w = np.zeros((2, 1)); model.b = 0.0
-model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=0.1, batch_size=32)
-acc = np.mean(model.predict(X_test) == y_test)
-plt.plot(model.val_loss_history, label=f"Нули (Acc: {acc:.2%})")
-print(f"{'Нули':<22} | Точность: {acc:.2%}")
-
-model = Perceptron(input_dim=2)
-model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=0.1, batch_size=32)
-acc = np.mean(model.predict(X_test) == y_test)
-plt.plot(model.val_loss_history, label=f"Маленькие N(0,0.01) (Acc: {acc:.2%})")
-print(f"{'Маленькие N(0,0.01)':<22} | Точность: {acc:.2%}")
-
-model = Perceptron(input_dim=2)
-model.w = np.random.randn(2, 1) * 10; model.b = 0.0
-model.fit(X_train, y_train, X_test, y_test, epochs=100, lr=0.1, batch_size=32)
-acc = np.mean(model.predict(X_test) == y_test)
-plt.plot(model.val_loss_history, label=f"Большие N(0,10) (Acc: {acc:.2%})")
-print(f"{'Большие N(0,10)':<22} | Точность: {acc:.2%}")
-
-plt.xlabel("Эпоха"); plt.ylabel("Validation Loss")
-plt.legend(); plt.grid(True); plt.title("Влияние инициализации весов")
-plt.show()
-
-# Генераторы
 def gen_linear(n=300, sep=2.0):
     X1 = np.random.randn(n//2, 2) + [sep, sep]
     X2 = np.random.randn(n//2, 2) - [sep, sep]
@@ -167,17 +107,14 @@ def add_noise(X, y, p=0.15):
     y[mask] = 1 - y[mask]
     return X, y
 
-# Обучение и визуализация
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 datasets = [("Линейно разделимые", gen_linear()), 
             ("XOR (нелинейные)", gen_xor()), 
             ("Окружность (нелинейные)", gen_circle())]
 
 for i, (title, (X_d, y_d)) in enumerate(datasets):
-    # Добавляем 10% шума
     X_d, y_d = add_noise(X_d, y_d, p=0.1)
     
-    # Стандартизация и split
     X_tr, X_te, y_tr, y_te = train_test_split(X_d, y_d, test_size=0.3, random_state=42, stratify=y_d)
     sc = StandardScaler()
     X_tr = sc.fit_transform(X_tr); X_te = sc.transform(X_te)
@@ -187,7 +124,6 @@ for i, (title, (X_d, y_d)) in enumerate(datasets):
     model.fit(X_tr, y_tr, X_te, y_te, epochs=100, lr=0.1, batch_size=32)
     acc = np.mean(model.predict(X_te) == y_te)
     
-    # Граница
     x_min, x_max = X_te[:,0].min()-0.5, X_te[:,0].max()+0.5
     y_min, y_max = X_te[:,1].min()-0.5, X_te[:,1].max()+0.5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
